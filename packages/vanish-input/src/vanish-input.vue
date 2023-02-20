@@ -14,25 +14,47 @@ function createParticleAtPoint(x: any, y: any, colorData: any) {
 }
 
 let btnCtx: CanvasRenderingContext2D | null
+const reductionFactor = 17
 const handleBtnClick = (e: any) => {
   // Get our color data like before
   const localX = e.offsetX
   const localY = e.offsetY
-  const rgbaColorArr = btnCtx.getImageData(localX, localY, 1, 1).data
-
-  // Get the button's positioning in terms of the window
+  const rgbaColorArr = (btnCtx as CanvasRenderingContext2D).getImageData(localX, localY, 1, 1).data
 
   const bcr = e.target.getBoundingClientRect()
   const globalX = bcr.left + localX
   const globalY = bcr.top + localY
 
-  // Create a particle using the color we obtained at the window location
-  // that we calculated
   createParticleAtPoint(globalX, globalY, rgbaColorArr)
+
+  // const width = e.target.offsetWidth
+  // const height = e.target.offsetHeight
+  // const colorData = (btnCtx as CanvasRenderingContext2D).getImageData(0, 0, width, height).data
+
+  // // Keep track of how many times we've iterated (in order to reduce
+  // // the total number of particles create)
+  // let count = 0
+
+  // // Go through every location of our button and create a particle
+  // for (let localX = 0; localX < width; localX++) {
+  //   for (let localY = 0; localY < height; localY++) {
+  //     if (count % reductionFactor === 0) {
+  //       const index = (localY * width + localX) * 4
+  //       const rgbaColorArr = colorData.slice(index, index + 4)
+
+  //       const bcr = e.target.getBoundingClientRect()
+  //       const globalX = bcr.left + localX
+  //       const globalY = bcr.top + localY
+
+  //       createParticleAtPoint(globalX, globalY, rgbaColorArr)
+  //     }
+  //     count++
+  //   }
+  // }
 }
 
 const btnRef = ref<HTMLElement | null>(null)
-
+const particleCanvas = ref<any | null>(null)
 onMounted(() => {
   // const btn = document.querySelector('button')
   // const btn = document.getElementById('btn')
@@ -70,7 +92,7 @@ onMounted(() => {
 
   function update() {
     // Clear out the old particles
-    if (typeof particleCtx !== 'undefined')
+    if (typeof particleCtx !== 'undefined' && particleCtx)
       particleCtx.clearRect(0, 0, window.innerWidth, window.innerHeight)
 
     // Draw all of our particles in their new location
@@ -98,7 +120,9 @@ onMounted(() => {
     <button id="btn" ref="btnRef" @click="handleBtnClick">
       Button
     </button>
-    <canvas ref="particleCanvas" class="expold-canvas" />
+    <Teleport to="body">
+      <canvas ref="particleCanvas" class="expold-canvas" />
+    </Teleport>
   </div>
 </template>
 
@@ -119,6 +143,8 @@ onMounted(() => {
   left: 0;
   z-index: 1001;
   pointer-events: none;
+  width: 100vw;
+  height: 100vh;
 }
 button {
   min-width: 135px;
