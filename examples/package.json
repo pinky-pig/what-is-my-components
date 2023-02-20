@@ -11,6 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@what-is-my-components/components": "workspace:^1.0.0"
+    "@what-is-my-components/components": "workspace:^1.0.0",
+    "vanish-input": "workspace:^1.0.0"
   }
 }
