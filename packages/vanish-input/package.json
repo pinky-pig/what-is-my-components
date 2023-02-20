@@ -15,6 +15,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@what-is-my-components/utils": "workspace:^1.0.0"
+    "@what-is-my-components/utils": "workspace:^1.0.0",
+    "html2canvas": "^1.4.1"
   }
 }
