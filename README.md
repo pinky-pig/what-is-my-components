@@ -47,24 +47,24 @@
 业务开发不涉及 node 端，采用 ES Module 规范。
 
 ```ts
-// CommonJS 
+// CommonJS
 
 // ./utils/moduleA.ts
-const name:string = "moduleA";
+// ./index.ts
+import { createArr } from './utils/string'
+const name = 'moduleA'
 module.exports = { name } // 或者 `exports.name = name;`
 // ./index.ts
-const { name } = require("./foo.js");
-console.log(name)  // moduleA
+const { name } = require('./foo.js')
+console.log(name) // moduleA
 
 // ES Module
 // ./utils/string.ts
-export function createArr(defaultParams:string = 'Tom') {
-  let allItems = Array.from(Array(100).keys(), (item,index) => {return {defaultParams,idx:item}});
-  let fillArr = new Array(10).fill({defaultParams})
-  return allItems
-}
-// ./index.ts
-import { createArr } from './utils/string'
+// export function createArr(defaultParams = 'Tom') {
+//   const allItems = Array.from(Array(100).keys(), (item, index) => { return { defaultParams, idx: item } })
+//   const fillArr = new Array(10).fill({ defaultParams })
+//   return allItems
+// }
 ```
 
 工具类文件夹及文件导出，默认 `index.ts` 文件导出本文件夹下所有的函数
@@ -116,40 +116,40 @@ export const pattern1 = /[?&]name=([^&]*)(&|$)/
 一般数量众多不可复制组件（譬如地图弹窗 Label）开发照如下规范：
 
 ```ts
-import { Component } from "vue"
+import { Component } from 'vue'
 // CSS Module
-import styles from "./index.module.less";
+import styles from './index.module.less'
 
-export function fightStationLabel(item?:stationItem) {
-  let { props } = item ? item : {props:{label:'队站',value:'1车6人'}}
-  return defineComponent({
-    setup(props) { },
-    render() {
-      let dom =  
-        <div class={styles.fightStationLabel}>
-          <div class={styles.fightStationLabelLeft}>{props.label}</div>
-          <div class={styles.fightStationLabelLeft}>{props.value}</div>
-        </div>
-      return dom
-    },
-  })
-}
+// export function fightStationLabel(item?:stationItem) {
+//   let { props } = item ? item : {props:{label:'队站',value:'1车6人'}}
+//   return defineComponent({
+//     setup(props) { },
+//     render() {
+//       let dom =
+//         <div class={styles.fightStationLabel}>
+//           <div class={styles.fightStationLabelLeft}>{props.label}</div>
+//           <div class={styles.fightStationLabelLeft}>{props.value}</div>
+//         </div>
+//       return dom
+//     },
+//   })
+// }
 
 /** 其他队站 */
-export function normalStationLabel(item?:stationItem) {
-  let { props } = item ? item : {props:{label:'队站',value:'出警'}}
-  return  defineComponent({
-    setup() { },
-    render() {
-      let dom =  
-        <div class={styles.normalStationLabel}>
-          <div class={props.label ? styles.normalStationLabelLeft : ''} >{props.label}</div>
-          <div class={props.value ? styles.normalStationLabelRight : ''} >{props.value}</div>
-        </div>
-      return dom
-    },
-  })
-}
+// export function normalStationLabel(item?:stationItem) {
+//   let { props } = item ? item : {props:{label:'队站',value:'出警'}}
+//   return  defineComponent({
+//     setup() { },
+//     render() {
+//       let dom =
+//         <div class={styles.normalStationLabel}>
+//           <div class={props.label ? styles.normalStationLabelLeft : ''} >{props.label}</div>
+//           <div class={props.value ? styles.normalStationLabelRight : ''} >{props.value}</div>
+//         </div>
+//       return dom
+//     },
+//   })
+// }
 ```
 
 ### JS 开发
@@ -163,15 +163,15 @@ export function normalStationLabel(item?:stationItem) {
 
 ```ts
 // ./utils/index.ts
+// 使用
+import { fn } from '~/utils'
+
 export * from './string.ts'
 
 // ./utils/string.ts
-export function fn(){
+export function fn() {
   return 'fn'
 }
-
-// 使用
-import { fn } from '~/utils'
 fn()
 ```
 

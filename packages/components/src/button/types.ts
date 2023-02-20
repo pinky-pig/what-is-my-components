@@ -1,28 +1,18 @@
-
-
-import { ExtractPropTypes } from 'vue'
-
+import type { ExtractPropTypes } from 'vue'
 
 export const ButtonType = ['default', 'primary', 'success', 'warning', 'danger']
 
-export const ButtonSize = ['large', 'normal', 'small', 'mini'];
-
+export const ButtonSize = ['large', 'normal', 'small', 'mini']
 
 export const buttonProps = {
   type: {
     type: String,
-    values: ButtonType
+    values: ButtonType,
   },
   size: {
     type: String,
-    values: ButtonSize
-  }
+    values: ButtonSize,
+  },
 }
 
 export type ButtonProps = ExtractPropTypes<typeof buttonProps>
-
-
-
-
-
-

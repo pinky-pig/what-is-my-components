@@ -2,18 +2,18 @@
   "name": "@what-is-my-components/components",
   "version": "1.0.0",
   "description": "",
+  "author": "",
+  "license": "MIT",
+  "keywords": [],
   "main": "index.ts",
-  "scripts": {
-    "build":"vite build",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "files": [
     "es",
     "lib"
   ],
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
+  "scripts": {
+    "build": "vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "@what-is-my-components/utils": "workspace:^1.0.0"
   }
