@@ -1,168 +1,70 @@
 <script setup lang="ts">
-import html2canvas from 'html2canvas'
 import { onMounted, ref } from 'vue'
-import { ExplodingParticle } from '..'
+import { TextParticleCircle } from '..'
 
-let particles: any[] = []
-function createParticleAtPoint(x: any, y: any, colorData: any) {
-  const particle = new (ExplodingParticle as any)()
-  particle.rgbArray = colorData
-  particle.startX = x
-  particle.startY = y
-  particle.startTime = Date.now()
-  particles.push(particle)
-}
-
-let btnCtx: CanvasRenderingContext2D | null
-const reductionFactor = 17
-const handleBtnClick = (e: any) => {
-  // Get our color data like before
-  const localX = e.offsetX
-  const localY = e.offsetY
-  const rgbaColorArr = (btnCtx as CanvasRenderingContext2D).getImageData(localX, localY, 1, 1).data
-
-  const bcr = e.target.getBoundingClientRect()
-  const globalX = bcr.left + localX
-  const globalY = bcr.top + localY
-
-  createParticleAtPoint(globalX, globalY, rgbaColorArr)
-
-  // const width = e.target.offsetWidth
-  // const height = e.target.offsetHeight
-  // const colorData = (btnCtx as CanvasRenderingContext2D).getImageData(0, 0, width, height).data
-
-  // // Keep track of how many times we've iterated (in order to reduce
-  // // the total number of particles create)
-  // let count = 0
-
-  // // Go through every location of our button and create a particle
-  // for (let localX = 0; localX < width; localX++) {
-  //   for (let localY = 0; localY < height; localY++) {
-  //     if (count % reductionFactor === 0) {
-  //       const index = (localY * width + localX) * 4
-  //       const rgbaColorArr = colorData.slice(index, index + 4)
-
-  //       const bcr = e.target.getBoundingClientRect()
-  //       const globalX = bcr.left + localX
-  //       const globalY = bcr.top + localY
-
-  //       createParticleAtPoint(globalX, globalY, rgbaColorArr)
-  //     }
-  //     count++
-  //   }
-  // }
-}
-
-const btnRef = ref<HTMLElement | null>(null)
-const particleCanvas = ref<any | null>(null)
+const canvas = ref()
+let ctx: any
+let dots: any = []// 定义数组，用于存放后续的坐标(x,y)
+let animationTimer: any
 onMounted(() => {
-  // const btn = document.querySelector('button')
-  // const btn = document.getElementById('btn')
-  if (!btnRef.value)
-    return
-  html2canvas(btnRef.value).then((canvas) => {
-    btnCtx = canvas.getContext('2d')
-    createParticleCanvas()
-  })
+  ctx = canvas.value.getContext('2d') as CanvasRenderingContext2D
+  render()
+})
 
-  let particleCanvas, particleCtx: CanvasRenderingContext2D | null
-  function createParticleCanvas() {
-    // Create our canvas
-    particleCanvas = document.createElement('canvas')
-    particleCtx = particleCanvas.getContext('2d')
-
-    // Size our canvas
-    particleCanvas.width = window.innerWidth
-    particleCanvas.height = window.innerHeight
-
-    // Position out canvas
-    particleCanvas.style.position = 'absolute'
-    particleCanvas.style.top = '0'
-    particleCanvas.style.left = '0'
-
-    // Make sure it's on top of other elements
-    particleCanvas.style.zIndex = '1001'
-
-    // Make sure other elements under it are clickable
-    particleCanvas.style.pointerEvents = 'none'
-
-    // Add our canvas to the page
-    document.body.appendChild(particleCanvas)
+function render() {
+  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+  for (let m = 0; m < dots.length; m++) {
+    dots[m].draw(ctx)
+    if (m === dots.length - 1) {
+      const percent = (Date.now() - dots[m].startTime) / dots[m].animationDuration
+      if (percent > 1)
+        dots = []
+    }
   }
+  // 动画渲染
+  animationTimer = window.requestAnimationFrame(render)
+}
 
-  function update() {
-    // Clear out the old particles
-    if (typeof particleCtx !== 'undefined' && particleCtx)
-      particleCtx.clearRect(0, 0, window.innerWidth, window.innerHeight)
-
-    // Draw all of our particles in their new location
-    for (let i = 0; i < particles.length; i++) {
-      particles[i].draw(particleCtx)
-
-      // Simple way to clean up if the last particle is done animating
-      if (i === particles.length - 1) {
-        const percent = (Date.now() - particles[i].startTime) / particles[i].animationDuration
-
-        if (percent > 1)
-          particles = []
+function textToParticle(text = 'Canvas') {
+  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+  dots = []
+  ctx.beginPath()
+  ctx.font = '80px Arial'
+  ctx.fillStyle = 'rgba(0,0,0,1)'
+  ctx.fillText(text, 150, 150)
+  ctx.fill()// 画一个文字,颜色就随意，a值尽量高点
+  const img = ctx.getImageData(0, 0, canvas.value.width, canvas.value.height)// getImageData，专门用于获取图片数据，这里直接取了整个Canvas
+  ctx.clearRect(0, 0, canvas.value.width, canvas.value.height)// 清空画布，就是把之前的文字清空，因为后面要以粒子（应该叫小圆圈）代替
+  for (let y = 0; y < img.height; y += 2) { // y+=3，是因为如果按像素取，有效值非常多，所以这里就每隔3像素取一点
+    for (let x = 0; x < img.width; x += 2) { // y是高，x是宽
+      // 这边就从左往右，从上往下；500X300的大小，会取166×100个像素点；×4则是因为rgba()
+      // 先第一行走完，再走第二行，往下走
+      const i = (x + y * img.width) * 4
+      if (img.data[i + 3] >= 128) { // 因为img.data中包含了每个像素点的rgba，＋3表示取a的值
+        const part = new TextParticleCircle(x, y, [0, 0, 1])
+        dots.push(part)
+        ctx.beginPath()
+        ctx.arc(x, y, 1, 0, Math.PI * 2, true)
+        ctx.fill()
       }
     }
-
-    // Animate performantly
-    window.requestAnimationFrame(update)
   }
-  window.requestAnimationFrame(update)
-})
+}
+function handleInput(e: any) {
+  textToParticle(e.target.value)
+  // window.cancelAnimationFrame(animationTimer)
+}
 </script>
 
 <template>
-  <div class="container">
-    <button id="btn" ref="btnRef" @click="handleBtnClick">
-      Button
-    </button>
-    <Teleport to="body">
-      <canvas ref="particleCanvas" class="expold-canvas" />
-    </Teleport>
-  </div>
+  <canvas id="particle" ref="canvas" width="500" height="300" />
+
+  <input
+    type="text"
+    @input="handleInput"
+  >
 </template>
 
 <style  scoped>
-.container{
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: grid;
-  place-items: center;
-  width: 100vw;
-  height: 100vh;
-}
 
-.expold-canvas{
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1001;
-  pointer-events: none;
-  width: 100vw;
-  height: 100vh;
-}
-button {
-  min-width: 135px;
-  max-width: 200px;
-  min-height: 50px;
-  border: 0;
-  outline: 0;
-
-  color: white;
-
-  /* pink to orange */
-  background: #ee0979;
-  background: linear-gradient(to right, #ee0979, #ff6a00);
-
-  vertical-align: top;
-}
-
-button {
-  cursor: pointer;
-}
 </style>

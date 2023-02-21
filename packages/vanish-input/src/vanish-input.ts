@@ -1,35 +1,40 @@
-/* An "exploding" particle effect that uses circles */
-export const ExplodingParticle = function (this: any) {
-  // Set how long we want our particle to animate for
-  this.animationDuration = 1000 // in ms
-
-  // Set the speed for our particle
-  this.speed = {
-    x: -5 + Math.random() * 10,
-    y: -5 + Math.random() * 10,
+export class TextParticleCircle {
+  startX: number
+  startY: number
+  radius: number
+  startTime: number
+  life: number
+  remainingLife: any
+  speed: { x: number; y: number }
+  rgbArray: number[]
+  animationDuration: number
+  constructor(x: number, y: number, rgba: number[], startTime = Date.now()) {
+    this.animationDuration = 1000 // in ms
+    this.startTime = startTime
+    this.startX = x
+    this.startY = y
+    this.radius = 1 + Math.random() * 5
+    this.life = 30 + Math.random() * 10
+    this.remainingLife = this.life
+    this.rgbArray = rgba
+    this.speed = {
+      x: -5 + Math.random() * 10,
+      y: -5 + Math.random() * 10,
+    }
   }
 
-  // Size our particle
-  this.radius = 5 + Math.random() * 5
-
-  // Set a max time to live for our particle
-  this.life = 30 + Math.random() * 10
-  this.remainingLife = this.life
-
-  // This function will be called by our animation logic later on
-  this.draw = (ctx: { beginPath: () => void; arc: (arg0: any, arg1: any, arg2: any, arg3: number, arg4: number) => void; fillStyle: string; fill: () => void }) => {
+  draw(ctx: CanvasRenderingContext2D) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const p = this
 
-    if (this.remainingLife > 0
-        && this.radius > 0) {
-      // Draw a circle at the current location
+    if (this.remainingLife > 0 && this.radius > 0) {
+      // 在当前的位置绘制粒子
       ctx.beginPath()
       ctx.arc(p.startX, p.startY, p.radius, 0, Math.PI * 2)
       ctx.fillStyle = `rgba(${this.rgbArray[0]},${this.rgbArray[1]},${this.rgbArray[2]}, 1)`
       ctx.fill()
 
-      // Update the particle's location and life
+      // 更新粒子的运动
       p.remainingLife--
       p.radius -= 0.25
       p.startX += p.speed.x
